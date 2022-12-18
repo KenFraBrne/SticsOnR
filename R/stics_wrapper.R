@@ -169,7 +169,12 @@ stics_wrapper <- function(model_options,
   cores_nb <- get_cores_nb(parallel = parallel, required_nb = cores)
 
   # Launching the cluster
-  cl <- makeCluster(cores_nb)
+  if(.Platform$OS.type == "unix") {
+    cluster_type = "FORK"
+  } else {
+    cluster_type = "PSOCK"
+  }
+  cl <- makeCluster(cores_nb, type=cluster_type)
 
   # Stopping the cluster when exiting
   on.exit(stopCluster(cl))
@@ -488,10 +493,10 @@ stics_wrapper <- function(model_options,
 # For phenological stages, set the value obtained at the last date for all dates
         if (length(tmp$sim_list) > 0) {
           if (length(intersect(stages_list, names(sim_list[[ip]])) > 0)) {
-            sim_list[[ip]] <-
-              dplyr::mutate(sim_list[[ip]],
-    dplyr::across(dplyr::all_of(intersect(stages_list, names(sim_list[[ip]]))),
-                                          ~.x[length(.x)]))
+            # sim_list[[ip]] <-
+            #   dplyr::mutate(sim_list[[ip]],
+    # dplyr::across(dplyr::all_of(intersect(stages_list, names(sim_list[[ip]]))),
+            #                               ~.x[length(.x)]))
           }
         }
 
